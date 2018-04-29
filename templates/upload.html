@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Upload</title>
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+</head>
+<body>
+
+<!-- <form id="upload-form" action="/protected" method="POST" enctype="multipart/form-data"> -->
+
+    <strong>Files:</strong><br>
+
+    <input id="file-picker" type="file" name="file" accept="wav/*" multiple>
+
+    <div id="msg"></div>
+
+    <input type="submit" value="Upload!" id="upload-button" onclick="sendFile()">
+
+
+    <h1 id="status_text"></h1>
+
+<!-- </form> -->
+
+</body>
+<script>
+
+    $("#file-picker").change(function(){
+
+        var input = document.getElementById('file-picker');
+
+        for (var i=0; i<input.files.length; i++)
+        {
+        //koala.jpg, koala.JPG substring(index) lastIndexOf('a') koala.1.jpg
+            var ext= input.files[i].name.substring(input.files[i].name.lastIndexOf('.')+1).toLowerCase()
+
+            if ((ext == 'wav') || (ext == 'wav'))
+            {
+                $("#msg").text("Files are supported")
+            }
+            else
+            {
+                $("#msg").text("Files are NOT supported")
+                document.getElementById("file-picker").value ="";
+            }
+
+        }
+
+    } );
+
+    function sendFile() {
+      var formData = new FormData();
+      formData.append("uploadedFile", document.getElementById("file-picker").files[0]);
+
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/upload_file", true);
+
+      xhr.onreadystatechange = function() {
+          if (xhr.readyState === 4) {
+              // alert(xhr.responseText);
+              document.getElementById("status_text").innerHTML = xhr.responseText;
+          }
+      };
+
+      xhr.send(formData);
+    }
+
+</script>
+</html>
