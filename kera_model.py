@@ -1,10 +1,10 @@
-
 import cPickle
 import numpy as np
-np.random.seed(15)
+
 import os
 import sys
 import csv
+
 
 import config1 as cfg
 import prepare_data1 as pp_data
@@ -12,8 +12,8 @@ from sklearn.externals import joblib
 
 
 
-####################################
-from keras.layers import InputLayer, Flatten, Dense, Dropout
+
+from keras.layers import InputLayer, Flatten, Dense, Dropout ,LSTM
 from keras.models import Sequential
 from keras.models import model_from_json
 
@@ -21,7 +21,7 @@ from keras.callbacks import ModelCheckpoint
 
 a = iter(list(range(200)))    
 
-def train(tr_feature, tr_csv, tr_feature, te_csv, 
+def train(tr_feature, tr_csv, te_feature, te_csv, 
           n_concat, hop, scaler, out_md,fold):
     # Prepare data 
     tr_x, tr_y = pp_data.formated_data(
@@ -31,7 +31,7 @@ def train(tr_feature, tr_csv, tr_feature, te_csv,
     print("part-1 training completed")
     
     te_x, te_y = pp_data.formated_data(
-                     fe_fd=tr_feature,
+                     fe_fd=te_feature,
                      csv_file=te_csv, 
                      n_concat=n_concat, hop=hop, scaler=scaler)
     
@@ -44,8 +44,9 @@ def train(tr_feature, tr_csv, tr_feature, te_csv,
     n_freq = tr_x.shape[2]
     n_out = len(cfg.labels)
     seq = Sequential()
-    seq.add(Dense(64 ,input_shape=(n_concat, n_freq)))
-
+    #seq.add(Dense(64 ,input_shape=(n_concat, n_freq)))
+    seq.add(LSTM(64, input_shape=(n_concat, n_freq),return_sequences=True))
+    
     seq.add(Flatten())
 
     seq.add(Dropout(0.2))
@@ -74,10 +75,10 @@ def train(tr_feature, tr_csv, tr_feature, te_csv,
     
 def dev_train():
         
-    train(tr_feature=dev_fe_fd, 
-              tr_csv=cfg.dev_tr_csv[fold], 
-              tr_feature=dev_fe_fd, 
-              te_csv=cfg.dev_te_csv[fold], 
+    train(tr_feature=dev_feature, 
+              tr_csv=cfg.dev_tr[fold], 
+              te_feature=dev_feature, 
+              te_csv=cfg.dev_te[fold], 
               n_concat=n_concat, 
               hop=hop, 
               scaler=scaler, 
@@ -87,17 +88,17 @@ def dev_train():
 def dev_recognize():
     
     pp_data.recognize(cfg.ld_md, 
-                  tr_feature=dev_fe_fd, 
-                  te_csv=cfg.dev_te_csv[fold], 
+                  tr_feature=dev_feature, 
+                  te_csv=cfg.dev_te[fold], 
                   n_concat=n_concat, 
                   hop=hop, 
                   scaler=scaler)
         
 def eva_train():
     
-    train(tr_feature=dev_fe_fd, 
-              tr_csv=cfg.dev_meta_csv, 
-              tr_feature=eva_fd_fd, 
+    train(tr_feature=dev_feature, 
+              tr_csv=cfg.dev_meta, 
+              te_feature=eva_feature, 
               te_csv=cfg.eva_meta_csv, 
               n_concat=n_concat, 
               hop=hop, 
@@ -107,7 +108,7 @@ def eva_train():
 
 def eva_recognize():
     pp_data.recognize(cfg.ld_md, 
-                  tr_feature=eva_fd_fd, 
+                  te_feature=eva_feature, 
                   te_csv=cfg.eva_meta_csv, 
                   n_concat=n_concat, 
                   scaler=scaler, 
@@ -121,19 +122,19 @@ if __name__ == '__main__':
     fold=0            # can be 0, 1, 2, 3
 
     # your workspace
-    dev_fe_fd = cfg.dev_fe_logmel_fd
-    eva_fd_fd = cfg.eva_fe_logmel_fd
+    dev_feature = cfg.dev_mel
+    eva_feature = cfg.eva_mel
 
     if sys.argv[1] == "--all":
-        scaler = pp_data.get_scaler(fe_fd=dev_fe_fd, 
-                                    csv_file=cfg.dev_tr_csv[fold], 
+        scaler = pp_data.get_scaler(fe_fd=dev_feature, 
+                                    csv_file=cfg.dev_tr[fold], 
                                     with_mean=True, 
                                     with_std=True)
     
         dev_train()
         #dev_recognize()
-        scaler = pp_data.get_scaler(fe_fd=dev_fe_fd, 
-                                    csv_file=cfg.dev_meta_csv, 
+        scaler = pp_data.get_scaler(fe_fd=dev_feature, 
+                                    csv_file=cfg.dev_meta, 
                                     with_mean=True, 
                                     with_std=True)
     
@@ -141,42 +142,39 @@ if __name__ == '__main__':
         #eva_recognize()
 
     elif sys.argv[1] == "--dev_train":
-        scaler = pp_data.get_scaler(fe_fd=dev_fe_fd, 
-                                    csv_file=cfg.dev_tr_csv[fold], 
+        scaler = pp_data.get_scaler(fe_fd=dev_feature, 
+                                    csv_file=cfg.dev_tr[fold], 
                                     with_mean=True, 
                                     with_std=True)
     
         dev_train() 
     
     elif sys.argv[1] == "--dev_recognize":
-        scaler = pp_data.get_scaler(fe_fd=dev_fe_fd, 
-                                    csv_file=cfg.dev_tr_csv[fold], 
+        scaler = pp_data.get_scaler(fe_fd=dev_feature, 
+                                    csv_file=cfg.dev_tr[fold], 
                                     with_mean=True, 
                                     with_std=True)
         scaler = joblib.load(cfg.ld_sc)
         dev_recognize()
         
     elif sys.argv[1] == "--eva_train": 
-        scaler = pp_data.get_scaler(fe_fd=dev_fe_fd, 
-                                    csv_file=cfg.dev_meta_csv, 
+        """scaler = pp_data.get_scaler(fe_fd=dev_feature, 
+                                    csv_file=cfg.dev_meta, 
                                     with_mean=True, 
-                                    with_std=True)
+                                    with_std=True)"""
         #joblib.dump(scaler, cfg.dp_sc)
+        print "scaler complete"
         scaler = joblib.load(cfg.ld_sc)
         eva_train()                                             
               
     elif sys.argv[1] == "--eva_recognize":
-        scaler = pp_data.get_scaler(fe_fd=dev_fe_fd, 
-                                    csv_file=cfg.dev_meta_csv, 
+        scaler = pp_data.get_scaler(fe_fd=dev_feature, 
+                                    csv_file=cfg.dev_meta, 
                                     with_mean=True, 
                                     with_std=True)
         #scaler = joblib.load(cfg.ld_sc)
-        joblib.dump(scaler, cfg.dp_sc)
+        #joblib.dump(scaler, cfg.dp_sc)
         eva_recognize()
         
     else: 
         raise Exception("Incorrect argv!")
-
-         
-    
-    

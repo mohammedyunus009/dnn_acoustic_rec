@@ -2,6 +2,7 @@ import soundfile as sf
 from scipy import signal
 import librosa #package for music and audio analysis. It provides the building blocks necessary to create music information retrieval systems
 import numpy as np
+import config1 as cfg
 def calculate_logmel(wav_fd, wr_fd):
     """Calculate log mel spectrogram 
     """
@@ -51,9 +52,9 @@ def to_mono(wav):
 
 
 if __name__ == "__main__":
-    create_folder(cfg.dev_fe_logmel_fd)
-    create_folder(cfg.eva_fe_logmel_fd)
+    create_folder(cfg.dev_mel)
+    create_folder(cfg.eva_mel)
     
     # calculate mel feature
-    calculate_logmel(cfg.dev_wav_fd, cfg.dev_fe_logmel_fd) # takes wave file and destination to be written
-    calculate_logmel(cfg.eva_wav_fd, cfg.eva_fe_logmel_fd)
+    calculate_logmel(cfg.dev_wav, cfg.dev_mel) # takes wave file and destination to be written
+    calculate_logmel(cfg.eva_wav, cfg.eva_mel)

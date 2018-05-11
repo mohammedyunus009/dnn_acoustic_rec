@@ -4,11 +4,11 @@ import numpy as np
 import scipy.stats
 import cPickle
 import os
-import config1 as cfg
+import config as cfg
 
 
 
-def sparse_to_categorical(x, n_out):
+def one_hot_encoding(x, n_out):
     x = x.astype(int)   # force type to int
     shape = x.shape
     x = x.flatten()
@@ -109,7 +109,7 @@ def formated_data(fe_fd, csv_file, n_concat, hop, scaler):
     
     y_all = np.array(y_all) 
     
-    y_all = sparse_to_categorical(y_all, len(cfg.labels)) # (n_samples, n_labels)
+    y_all = one_hot_encoding(y_all, len(cfg.labels)) # (n_samples, n_labels)
     
     x3d_all = np.concatenate(x3d_all)   # (n_samples, n_concat, n_freq)
     return x3d_all, y_all
@@ -120,34 +120,11 @@ def recognize(ld_md, te_feature, te_csv, n_concat, hop, scaler):
     
     from keras.layers import InputLayer, Flatten, Dense, Dropout
     from keras.models import Sequential
-    from keras.models import model_from_json
+    from keras.models import model_from_json, load_model
 
     from keras.callbacks import ModelCheckpoint
-
-    n_out = len(cfg.labels)
-    seq = Sequential()
-    seq.add(Dense(64 ,input_shape=(cfg.n_concat, cfg.n_freq)))
-
-    seq.add(Flatten())
-
-    seq.add(Dropout(0.2))
-    seq.add(Dense(300, activation='relu'))
-    seq.add(Dropout(0.2))
-    seq.add(Dense(300, activation='relu'))
-    seq.add(Dropout(0.2))
-    seq.add(Dense(n_out, activation='softmax'))
-    print "done"
-
-
-    seq.load_weights(ld_md)
-
-    seq.compile(optimizer='Adam',
-              loss='categorical_crossentropy',
-              metrics=['accuracy'])
-    n_labels = len(cfg.labels)
-    confuse_mat = np.zeros((n_labels, n_labels))      # confusion matrix
     
-    
+    seq = load_model(ld_md)
     # Get test file names
     with open(te_csv, 'rb') as f:
         reader = csv.reader(f)

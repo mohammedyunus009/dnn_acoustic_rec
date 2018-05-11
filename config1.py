@@ -1,49 +1,53 @@
-
-
- 
- 
-
-# development config
-dev_wav_fd = "/TUT-acoustic-scenes-2016-development/audio"
+#development config
+dev_wav = "/home/ubuntu/TUT-acoustic-scenes-2016-development/audio"
 
 fd1="/home/ubuntu/test/data/" #FOR DEV
 fd2="/home/ubuntu/test/data/"	#for eva
 #mkdir test
-dev_csv_fd = fd1 + "TUT-acoustic-scenes-2016-development/evaluation_setup"
+dev_add = fd1 + "TUT-acoustic-scenes-2016-development/evaluation_setup"
 
-dev_tr_csv = [dev_csv_fd+"/fold1_train.txt", dev_csv_fd+"/fold2_train.txt", 
-               dev_csv_fd+"/fold3_train.txt", dev_csv_fd+"/fold4_train.txt"]
+dev_tr = [dev_add+"/fold1_train.txt", dev_add+"/fold2_train.txt", 
+               dev_add+"/fold3_train.txt", dev_add+"/fold4_train.txt"]
 
-dev_te_csv = [dev_csv_fd+"/fold1_evaluate.txt", dev_csv_fd+"/fold2_evaluate.txt", 
-               dev_csv_fd+"/fold3_evaluate.txt", dev_csv_fd+"/fold4_evaluate.txt"]
-dev_meta_csv = fd1 + "TUT-acoustic-scenes-2016-development/meta.txt"
+dev_te = [dev_add+"/fold1_evaluate.txt", dev_add+"/fold2_evaluate.txt", 
+               dev_add+"/fold3_evaluate.txt", dev_add+"/fold4_evaluate.txt"]
+dev_meta = fd1 + "TUT-acoustic-scenes-2016-development/meta.txt"
 
 # evaluation config
-eva_wav_fd = "/test/DCASE2016_Task1/data/TUT-acoustic-scenes-2016-evaluation/audio"
-eva_meta_csv = fd2 + "TUT-acoustic-scenes-2016-evaluation/meta.txt"
+eva_wav = "/home/ubuntu/TUT-acoustic-scenes-2016-evaluation/audio"
+eva_meta = fd2 + "TUT-acoustic-scenes-2016-evaluation/meta.txt"
 
 # your workspace
-scrap_fd = "/home/ubuntu/"	#"/home/ruksana/test/DCASE2016_Task1/src/DCASE2016_task1_scrap"
-fe1 = scrap_fd + "dev_datasets/features"
-fe2 = scrap_fd + "datasets/features"
-dev_fe_logmel_fd = fe1 + "/dev/logmel"
-eva_fe_logmel_fd = fe2 + "/eva/logmel"
-md_fd = scrap_fd + "/models"
-dev_md_fd = scrap_fd + "/dev"
-eva_md_fd = scrap_fd + "/eva"
+workspace = "/home/ubuntu/"	
+fe1 = workspace + "dev_datasets/features"
+fe2 = workspace + "datasets/features"
+dev_mel = fe1 + "/dev/logmel"
+eva_mel = fe2 + "/eva/logmel"
+md_fd = workspace + "/models"
+#dev_md = workspace + "/dev"
+#eva_md = workspace + "/eva"
 
 # 1 of 15 acoustic label
 labels = ['bus', 'cafe/restaurant', 'car', 'city_center', 'forest_path', 
            'grocery_store', 'home', 'beach', 'library', 'metro_station', 
            'office', 'residential_area', 'train', 'tram', 'park']
-            
-lb_to_id = {lb:id for id, lb in enumerate(labels)}
-id_to_lb = {id:lb for id, lb in enumerate(labels)}
+
+j=0
+id_to_lb={}
+for i in labels:
+	id_to_lb.update({j:i})
+	j=j+1
+
+j=0
+lb_to_id={}
+for i in labels:
+	lb_to_id.update({i:j})
+	j=j+1
+
 
 
 fs = 44100.
 n_fft = 1024.
-
 
 n_concat=11
 n_freq=64
