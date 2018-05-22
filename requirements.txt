@@ -1,0 +1,11 @@
+tensorflow-gpu
+keras
+sklearn
+soundfile
+numpy
+librosa
+scipy
+pysoundfile
+botocore
+flask
+h5py

@@ -1,12 +1,18 @@
 from flask import Flask, session, render_template, request, redirect, g, url_for
 import os
 import uuid
+from src import config as cfg
+import src.prepare_data as pp_data
+
+password = cfg.password
+username = cfg.username
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
+username = ['anything','yunus','op']
+password = ['lol','name1','name2']
 
-__author__ = 'ibininja'
 #app = Flask(__name__)
 #APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 labels = ['bus', 'cafe/restaurant', 'car', 'city_center', 'forest_path',
@@ -19,9 +25,10 @@ def index():
     if request.method == 'POST':
         session.pop('user', None)
 
-        if request.form['password'] == '':
-            session['user'] = request.form['username']
-            return render_template('upload.html')
+        if request.form['username'] in username:
+            if request.form['password'] in password:
+                session['user'] = request.form['username']
+                return render_template('upload.html')
 
     return render_template('index.html')
 
@@ -32,6 +39,7 @@ WAV_DROP_DIR = "audio-files"
 
 @app.route('/upload_file', methods=['POST'])
 def upload_file():
+    
 
     if not os.path.isdir(WAV_DROP_DIR):
         os.mkdir(WAV_DROP_DIR)

@@ -7,18 +7,17 @@ import scipy.stats
 import cPickle
 import os
 from scipy import signal
-import librosa 
+import librosa
 
-import config1 as cfg
+import src.config as cfg
+import src.prepare_data as pp_data
 import sys
-import prepare_data1 as pp_data
 
 from keras.layers import InputLayer, Flatten, Dense, Dropout
 from keras.models import Sequential,load_model
 from keras.layers import Dense
 from keras.models import model_from_json ,load_model
-
-from keras.callbacks import ModelCheckpoint
+from keras import backend as K
 
 def sparse_to_categorical(x, n_out):
     x = x.astype(int)   # force type to int
@@ -80,9 +79,8 @@ def pred(rd_path,ld_md,scaler):
     for l in range(0,len(b)):   
         per=str(a[b[l]]*100/257)
         print "This can be ",cfg.id_to_lb[b[l]],per,"%"
+    K.clear_session()
     return cfg.id_to_lb[pred_id]
-
-
 
 def get_mode_value(ary):
     return scipy.stats.mode(ary)[0]
@@ -93,13 +91,13 @@ def others(rd_pred,ld_md):
     fold = cfg.fold            # can be 0, 1, 2, 3
     dev_feature = cfg.dev_mel
     eva_feature = cfg.eva_mel
-    #print "came till here"
-    '''scaler = pp_data.get_scaler(fe_fd=dev_feature, 
+    
+    scaler = pp_data.get_scaler(fe_fd=dev_feature, 
                                     csv_file=cfg.dev_tr[fold], 
                                     with_mean=True, 
-                                    with_std=True)'''
+                                    with_std=True)
     #joblib.dump(scaler, cfg.dp_sc)
-    scaler=joblib.load(cfg.ld_sc)
+    #scaler=joblib.load(cfg.ld_sc)
     msg = pred(rd_pred,ld_md,scaler)
     return msg
     
@@ -126,12 +124,13 @@ if __name__ == '__main__':
                                     csv_file=cfg.dev_tr_csv[fold], 
                                     with_mean=True, 
                                     with_std=True)
- """
+        """
     
     if sys.argv[1] == "single_pred": 
         """scaler = pp_data.get_scaler(fe_fd=dev_fe_fd, 
                                     csv_file=cfg.dev_tr_csv[fold], 
                                     with_mean=True, 
                                     with_std=True)
-                                    """
+        """
         pred(cfg.rd_pred,cfg.ld_md,scaler)
+

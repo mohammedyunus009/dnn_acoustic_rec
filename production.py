@@ -1,9 +1,10 @@
 import soundfile as sf
 import numpy as np
 import librosa 
-import config as cfg
 from scipy import signal
 import cPickle
+import src.config as cfg
+
 
 
 def to_mono(wav):
